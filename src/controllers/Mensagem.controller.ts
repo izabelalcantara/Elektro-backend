@@ -8,15 +8,21 @@ class MensagemController {
   public async create(request: Request, response: Response) {
     try {
       const { remetenteId, destinatarioId, conteudo } = request.body;
+      
+      if (isNaN(remetenteId) || isNaN(destinatarioId)) {
+        return response.status(400).json({ message: 'IDs inválidos.' });
+      }
+  
       const newMensagem = await prisma.mensagem.create({
         data: {
-          remetenteId,
-          destinatarioId,
+          remetente: { connect: { id: Number(remetenteId) } }, 
+          destinatario: { connect: { id: Number(destinatarioId) } }, 
           conteudo,
         },
       });
-      return response.status(201).json({ 
-        message: "Mensagem enviada com sucesso",
+  
+      return response.status(201).json({
+        message: "Mensagem criada com sucesso",
         mensagem: newMensagem,
       });
     } catch (error) {
@@ -26,6 +32,8 @@ class MensagemController {
       });
     }
   }
+  
+  
 
   public async getMensagemById(request: Request, response: Response) {
     try {
